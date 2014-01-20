@@ -1,6 +1,16 @@
 <html>
 <head>
 	<title>Better Gumtree Search</title>
+	<style type="text/css">
+	.resultsIframe {
+		bottom:0;
+		right:0;
+		left:0;
+		height:300px;
+		width:100%;
+		display:none;
+	}
+	</style>
 </head>
 <body>
 	<h1>Gumtree is great</h1>
@@ -10,26 +20,27 @@
 	<form class="searchForm">
 		<p>
 			<label for="minPrice">Min Price:</label>
-			<input type="text" name="minPrice" />
+			<input type="text" name="minPrice" id="minPrice" />
 		</p>
 		<p>
 			<label for="maxPrice">Max Price:</label>
-			<input type="text" name="maxPrice" value="580" />
+			<input type="text" name="maxPrice" id="maxPrice" value="580" />
 		</p>
 		<p>
 			<label for="searchLocation">Search Location:</label>
-			<input type="text" name="searchLocation" value="Shoreditch, London" />
+			<input type="text" name="searchLocation" id="searchLocation" value="Shoreditch, London" />
 		</p>
 		<p>
 			<label for="sellerType">Seller Type:</label>
-			<select name="sellerType">
+			<select name="sellerType" id="sellerType">
+				<option value="any" default>Don't mind</option>
 				<option value="private" default>Private Landlord</option>
-				<option value="agency">Agency</option>
+				<option value="trade">Agency</option>
 			</select>
 		</p>
 		<p>
 			<label for="distance">Distance Radius (miles):</label>
-			<select name="distance">
+			<select name="distance" id="distance">
 				<option>0.25</option>
 				<option selected>0.5</option>
 				<option>1</option>
@@ -41,7 +52,7 @@
 		</p>
 		<p>
 			<label for="minBeds">Min Beds:</label>
-			<select name="minBeds">
+			<select name="minBeds" id="minBeds">
 				<option>1</option>
 				<option>2</option>
 				<option selected>3</option>
@@ -52,22 +63,25 @@
 		</p>
 		<p>
 			<label for="query">Query:</label>
-			<input type="text" name="query" />
+			<input type="text" id="query" name="query" />
 		</p>
 		<p>
 			<label for="searchScope">Search Scope:</label>
-			<select name="searchScope">
+			<select name="searchScope" id="searchScope">
 				<option value="title">Title</option>
 				<option value="all">Title &amp; Description</option>
 			</select>
 		</p>
 	</form>
+	<input type="checkbox" id="showIframe" class="showIframe" /><label for="showIframe">Show results below</label>
 	<p class="results">Go to your results at <a target="_blank" class="resultsURL" href=""></a> (opens in a new window)</p>
+	<iframe class="resultsIframe" src=""></iframe>
 	<script type="text/javascript" src="jquery-2.0.3.min.js"></script>
 	<script src="string.min.js"></script>
 	<script src="underscore-min.js"></script>
 	<script type="text/javascript">
 		var urlTemplate = 'http://www.gumtree.com/search?current-distance={{distance}}&seller_type={{sellerType}}&min_beds={{minBeds}}&max_beds={{maxBeds}}&min_price={{minPrice}}&max_price={{maxPrice}}&q={{query}}&search_location={{searchLocation}}&category=flats-and-houses-for-rent&search_scope={{searchScope}}';
+		var resultsVisible = false;
 
 		function generateUrlFromForm () {
 			var searchValues = jQuery('.searchForm').serialize();
@@ -80,11 +94,21 @@
 			var url = S(urlTemplate).template(searchValues).s;
 			jQuery('.resultsURL').attr('href', url);
 			jQuery('.resultsURL').text(url);
+			if (resultsVisible) {
+				$('resultsIframe').attr('src', url);
+			}
 		}
 
 		jQuery(document).ready(function () {
 			jQuery('input,select').change('click', function(e){
 				e.preventDefault();
+				if ($('.showIframe').val() == 'on') {
+					$('.resultsIframe').show();
+					resultsVisible = true;
+				} else {
+					$('.resultsIframe').hide();
+					resultsVisible = false;
+				}
 				generateUrlFromForm();
 			});
 
